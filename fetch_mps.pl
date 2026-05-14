@@ -3,6 +3,7 @@ use warnings;
 use LWP::UserAgent;
 use JSON;
 use utf8;
+use File::Path qw(make_path);
 
 # 1. Setup the API URL (Current House of Commons Members)
 my $url = 'https://members-api.parliament.uk/api/Members/Search?House=1&IsCurrentMember=true&take=650';
@@ -12,6 +13,8 @@ $ua->agent("ParliamentPortalFetcher/1.0");
 
 print "Fetching data from Parliament API...\n";
 my $response = $ua->get($url);
+
+make_path('public') unless -d 'public';
 
 if ($response->is_success) {
     # 2. Decode the incoming JSON

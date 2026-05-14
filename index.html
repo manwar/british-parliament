@@ -22,9 +22,7 @@ const width = 800;
     const svg = d3.select("#chart")
         .append("svg")
         .attr("viewBox", `0 0 ${width} ${height}`)
-        .attr("preserveAspectRatio", "xMidYMid meet")
-        .style("width", "100%")
-        .style("height", "auto");
+        .attr("preserveAspectRatio", "xMidYMid meet");
 
     const tooltip = d3.select("body").append("div").attr("class", "tooltip").style("opacity", 0);
 
@@ -37,54 +35,52 @@ const width = 800;
     };
 
     d3.json("public/members.json").then(rawData => {
+        // Filter out bad data
         const data = rawData.filter(d => d && d.party);
+        
+        // Sort so parties stay together
         data.sort((a, b) => a.party.localeCompare(b.party));
 
-        const totalSeats = data.length;
-        const rows = 12; 
-        const seatsPerRow = Math.ceil(totalSeats / rows);
+        // Use a fixed number for the arc width
+        const seatsInRow = 50; 
 
-// Use a hardcoded number for the spread to force the curve
-        const dotsInRow = 55; 
+        data.forEach((mp, i) => {
+            const row = Math.floor(i / seatsInRow);
+            const col = i % seatsInRow;
 
-data.forEach((mp, i) => {
-        // 1. Position within the grid
-        const rowNumber = Math.floor(i / seatsPerRow);
-        const posInRow = i % seatsPerRow;
+            // Radius (Distance from bottom center)
+            const r = 180 + (row * 22); 
+            
+            // Angle math: 
+            // We want to spread across 180 degrees.
+            // pos / (total - 1) gives us a decimal between 0 and 1.
+            const spread = col / (seatsInRow - 1);
+            
+            // PI (Left) to 2*PI (Right)
+            const angle = Math.PI + (spread * Math.PI);
 
-        // 2. Radius: How far the dot is from the bottom-center "Speaker" point
-        // We start at 160px and move out 22px per row
-        const r = 160 + (rowNumber * 22); 
-        
-        // 3. Angle: Map from Math.PI (Left) to 2 * Math.PI (Right)
-        // This is exactly 180 degrees spread across the top half of a circle
-        const angle = Math.PI + (posInRow / (seatsPerRow - 1)) * Math.PI;
+            // X and Y calculation
+            const x = 400 + r * Math.cos(angle);
+            const y = 460 + r * Math.sin(angle);
 
-        // 4. Coordinates:
-        // (width / 2) centers the arc horizontally at 400px
-        // (height - 50) places the focal point near the bottom at 450px
-        const x = (width / 2) + r * Math.cos(angle);
-        const y = (height - 50) + r * Math.sin(angle);
-
-        svg.append("circle")
-            .attr("cx", x)
-            .attr("cy", y)
-            .attr("r", 5) // Clean, uniform dots
-            .attr("fill", colorMap[mp.party] || (mp.party_color ? `#${mp.party_color}` : "#808080"))
-            .attr("class", "mp-dot")
-            .on("mouseover", (event) => {
-                tooltip.transition().duration(200).style("opacity", .9);
-                tooltip.html(`<strong>${mp.name}</strong><br/>${mp.party}`)
-                    .style("left", (event.pageX + 10) + "px")
-                    .style("top", (event.pageY - 28) + "px");
-            })
-            .on("mouseout", () => tooltip.style("opacity", 0));
-    });
+            svg.append("circle")
+                .attr("cx", x)
+                .attr("cy", y)
+                .attr("r", 5)
+                .attr("fill", colorMap[mp.party] || (mp.party_color ? `#${mp.party_color}` : "#808080"))
+                .attr("class", "mp-dot")
+                .on("mouseover", (event) => {
+                    tooltip.transition().duration(200).style("opacity", .9);
+                    tooltip.html(`<strong>${mp.name}</strong><br/>${mp.party}`)
+                        .style("left", (event.pageX + 10) + "px")
+                        .style("top", (event.pageY - 28) + "px");
+                })
+                .on("mouseout", () => tooltip.style("opacity", 0));
+        });
+    }).catch(err => console.error("Could not load JSON:", err));    
 
 
-        
-    });    
-
+    
 
 </script>    
 

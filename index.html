@@ -51,33 +51,44 @@
         const rows = 12; 
         const seatsPerRow = Math.ceil(totalSeats / rows);
 
-        data.forEach((mp, i) => {
-            const rowNumber = Math.floor(i / seatsPerRow);
-            const posInRow = i % seatsPerRow;
+data.forEach((mp, i) => {
+    // 1. Determine position
+    const rowNumber = Math.floor(i / seatsPerRow);
+    const posInRow = i % seatsPerRow;
 
-            const r = 160 + (rowNumber * 22); 
-            // Math: Map dots from PI (left) to 2*PI (right)
-            const angle = Math.PI + (posInRow / (seatsPerRow - 1)) * Math.PI;
+    // 2. Radius Logic: 
+    // inner circle starts at 160, each row adds 22px of distance
+    const r = 160 + (rowNumber * 22); 
+    
+    // 3. Angle Logic (The most important part):
+    // We spread dots from Math.PI (Left) to 2 * Math.PI (Right)
+    // We use (seatsPerRow - 1) to ensure the dots hit both ends perfectly
+    const angle = Math.PI + (posInRow / (seatsPerRow - 1)) * Math.PI;
 
-            const x = (width / 2) + r * Math.cos(angle);
-            const y = (height - 50) + r * Math.sin(angle);
+    // 4. Cartesian Math:
+    // width / 2 centers the chart horizontally
+    // height - 50 sets the 'floor' of the chart near the bottom
+    const x = (width / 2) + r * Math.cos(angle);
+    const y = (height - 50) + r * Math.sin(angle);
 
-            svg.append("circle")
-                .attr("cx", x)
-                .attr("cy", y)
-                .attr("r", 6)
-                .attr("fill", colorMap[mp.party] || (mp.party_color ? `#${mp.party_color}` : "#808080"))
-                .attr("class", "mp-dot")
-                .on("mouseover", (event) => {
-                    tooltip.transition().duration(200).style("opacity", .9);
-                    tooltip.html(`<strong>${mp.name}</strong><br/>${mp.party}<br/>${mp.constituency}`)
-                        .style("left", (event.pageX + 10) + "px")
-                        .style("top", (event.pageY - 28) + "px");
-                })
-                .on("mouseout", () => {
-                    tooltip.transition().duration(500).style("opacity", 0);
-                });
+    svg.append("circle")
+        .attr("cx", x)
+        .attr("cy", y)
+        .attr("r", 6)
+        .attr("fill", colorMap[mp.party] || (mp.party_color ? `#${mp.party_color}` : "#808080"))
+        .attr("class", "mp-dot")
+        .on("mouseover", (event) => {
+            tooltip.transition().duration(200).style("opacity", .9);
+            tooltip.html(`<strong>${mp.name}</strong><br/>${mp.party}<br/>${mp.constituency}`)
+                .style("left", (event.pageX + 10) + "px")
+                .style("top", (event.pageY - 28) + "px");
+        })
+        .on("mouseout", () => {
+            tooltip.transition().duration(500).style("opacity", 0);
         });
+});
+
+        
     }).catch(err => console.error("Error loading JSON:", err));
 </script>    
 

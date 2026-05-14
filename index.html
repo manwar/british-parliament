@@ -48,13 +48,16 @@ const width = 800;
             const rowNumber = Math.floor(i / seatsPerRow);
             const posInRow = i % seatsPerRow;
 
-            // Radius starts further out to fill the screen
-            const r = 120 + (rowNumber * 20); 
+            // 1. Increase the radius so the arc is bigger and more visible
+            const r = 140 + (rowNumber * 22); 
             
-            // The Arc: We use -Math.PI to 0 to make the arc go UP
+            // 2. The Arc: Use -Math.PI to 0. 
+            // This forces the Sine wave to go UP into the SVG's negative coordinate space.
             const angle = -Math.PI + (posInRow / (seatsPerRow - 1)) * Math.PI;
 
-            // Center the arc at (400, 450)
+            // 3. Positioning: 
+            // Center X at 400. 
+            // Set the Y "Base" at 450 (near the bottom) so the arc swings UP to y=200.
             const x = (width / 2) + r * Math.cos(angle);
             const y = (height - 50) + r * Math.sin(angle);
 
@@ -72,6 +75,9 @@ const width = 800;
                 })
                 .on("mouseout", () => tooltip.style("opacity", 0));
         });
+
+
+        
     });    
 
 

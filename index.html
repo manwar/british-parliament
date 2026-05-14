@@ -52,41 +52,42 @@
         const seatsPerRow = Math.ceil(totalSeats / rows);
 
 data.forEach((mp, i) => {
-    // 1. Determine position
+    // 1. Calculate row and position
     const rowNumber = Math.floor(i / seatsPerRow);
     const posInRow = i % seatsPerRow;
 
-    // 2. Radius Logic: 
-    // inner circle starts at 160, each row adds 22px of distance
-    const r = 160 + (rowNumber * 22); 
+    // 2. Adjust Radius (Distance from center)
+    const r = 180 + (rowNumber * 25); 
     
-    // 3. Angle Logic (The most important part):
-    // We spread dots from Math.PI (Left) to 2 * Math.PI (Right)
-    // We use (seatsPerRow - 1) to ensure the dots hit both ends perfectly
+    // 3. Angle (The Arc)
+    // We force a spread between 180 and 360 degrees
     const angle = Math.PI + (posInRow / (seatsPerRow - 1)) * Math.PI;
 
-    // 4. Cartesian Math:
-    // width / 2 centers the chart horizontally
-    // height - 50 sets the 'floor' of the chart near the bottom
+    // 4. Coordinates
     const x = (width / 2) + r * Math.cos(angle);
-    const y = (height - 50) + r * Math.sin(angle);
+    const y = (height - 20) + r * Math.sin(angle); // Lowered the 'floor'
+
+    // DIAGNOSTIC: Open your browser console to see these numbers
+    if (i < 5) console.log(`MP ${i}: x=${x.toFixed(2)}, y=${y.toFixed(2)}, angle=${angle.toFixed(2)}`);
 
     svg.append("circle")
         .attr("cx", x)
         .attr("cy", y)
-        .attr("r", 6)
+        .attr("r", 5)
         .attr("fill", colorMap[mp.party] || (mp.party_color ? `#${mp.party_color}` : "#808080"))
         .attr("class", "mp-dot")
         .on("mouseover", (event) => {
             tooltip.transition().duration(200).style("opacity", .9);
-            tooltip.html(`<strong>${mp.name}</strong><br/>${mp.party}<br/>${mp.constituency}`)
+            tooltip.html(`<strong>${mp.name}</strong><br/>${mp.party}`)
                 .style("left", (event.pageX + 10) + "px")
                 .style("top", (event.pageY - 28) + "px");
         })
-        .on("mouseout", () => {
-            tooltip.transition().duration(500).style("opacity", 0);
-        });
+        .on("mouseout", () => tooltip.style("opacity", 0));
 });
+        
+
+    
+    });
 
         
     }).catch(err => console.error("Error loading JSON:", err));

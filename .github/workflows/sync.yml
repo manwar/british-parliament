@@ -1,4 +1,8 @@
 name: Hourly MP Sync
+
+permissions:
+  contents: write
+
 on:
   schedule:
     - cron: '0 * * * *' # Every hour

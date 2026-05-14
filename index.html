@@ -48,25 +48,28 @@ const width = 800;
         const dotsInRow = 55; 
 
 data.forEach((mp, i) => {
+        // 1. Position within the grid
         const rowNumber = Math.floor(i / seatsPerRow);
         const posInRow = i % seatsPerRow;
 
-        // Radius: How far from the bottom-center focal point
-        const r = 150 + (rowNumber * 25); 
+        // 2. Radius: How far the dot is from the bottom-center "Speaker" point
+        // We start at 160px and move out 22px per row
+        const r = 160 + (rowNumber * 22); 
         
-        // Angle: Map from Math.PI (Left) to 2 * Math.PI (Right)
-        // This creates a half-circle arc that opens downward
+        // 3. Angle: Map from Math.PI (Left) to 2 * Math.PI (Right)
+        // This is exactly 180 degrees spread across the top half of a circle
         const angle = Math.PI + (posInRow / (seatsPerRow - 1)) * Math.PI;
 
-        // x centers on the middle of the 800px width
-        // y starts at the bottom and uses sin() to go UP
+        // 4. Coordinates:
+        // (width / 2) centers the arc horizontally at 400px
+        // (height - 50) places the focal point near the bottom at 450px
         const x = (width / 2) + r * Math.cos(angle);
-        const y = (height - 40) + r * Math.sin(angle);
+        const y = (height - 50) + r * Math.sin(angle);
 
         svg.append("circle")
             .attr("cx", x)
             .attr("cy", y)
-            .attr("r", 5)
+            .attr("r", 5) // Clean, uniform dots
             .attr("fill", colorMap[mp.party] || (mp.party_color ? `#${mp.party_color}` : "#808080"))
             .attr("class", "mp-dot")
             .on("mouseover", (event) => {

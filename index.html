@@ -15,76 +15,66 @@
     <div id="chart"></div>
 
 <script>
-    const width = 800;
+
+const width = 800;
     const height = 500;
-    const margin = 50;
 
     const svg = d3.select("#chart")
         .append("svg")
-        .attr("viewBox", `0 0 ${width} ${height}`) // Makes it responsive
-        .attr("preserveAspectRatio", "xMidYMid meet");
+        .attr("viewBox", `0 0 ${width} ${height}`)
+        .attr("preserveAspectRatio", "xMidYMid meet")
+        .style("width", "100%")
+        .style("height", "auto");
 
     const tooltip = d3.select("body").append("div").attr("class", "tooltip").style("opacity", 0);
 
-    // Reliable UK Party Colors
     const colorMap = {
-        "Labour": "#E4003B",
-        "Labour (Co-op)": "#E4003B",
-        "Conservative": "#0087DC",
-        "Liberal Democrat": "#FAA61A",
-        "Reform UK": "#12B6CF",
-        "Green Party": "#6AB023",
-        "Scottish National Party": "#FDF38E",
-        "Plaid Cymru": "#005B54",
-        "Independent": "#DCDCDC",
-        "Speaker": "#37312D"
+        "Labour": "#E4003B", "Labour (Co-op)": "#E4003B",
+        "Conservative": "#0087DC", "Liberal Democrat": "#FAA61A",
+        "Reform UK": "#12B6CF", "Green Party": "#6AB023",
+        "Scottish National Party": "#FDF38E", "Plaid Cymru": "#005B54",
+        "Independent": "#DCDCDC", "Speaker": "#37312D"
     };
 
     d3.json("public/members.json").then(rawData => {
-        // FILTER: Ensure we only use valid MP objects to prevent the 'party' error
         const data = rawData.filter(d => d && d.party);
-
-        // SORT: Group by party so they sit together in the arc
         data.sort((a, b) => a.party.localeCompare(b.party));
 
         const totalSeats = data.length;
         const rows = 12; 
         const seatsPerRow = Math.ceil(totalSeats / rows);
 
-data.forEach((mp, i) => {
-    // 1. Calculate row and position
-    const rowNumber = Math.floor(i / seatsPerRow);
-    const posInRow = i % seatsPerRow;
+        data.forEach((mp, i) => {
+            const rowNumber = Math.floor(i / seatsPerRow);
+            const posInRow = i % seatsPerRow;
 
-    // 2. Adjust Radius (Distance from center)
-    const r = 180 + (rowNumber * 25); 
-    
-    // 3. Angle (The Arc)
-    // We force a spread between 180 and 360 degrees
-    const angle = Math.PI + (posInRow / (seatsPerRow - 1)) * Math.PI;
+            // Radius starts further out to fill the screen
+            const r = 120 + (rowNumber * 20); 
+            
+            // The Arc: We use -Math.PI to 0 to make the arc go UP
+            const angle = -Math.PI + (posInRow / (seatsPerRow - 1)) * Math.PI;
 
-    // 4. Coordinates
-    const x = (width / 2) + r * Math.cos(angle);
-    const y = (height - 20) + r * Math.sin(angle); // Lowered the 'floor'
+            // Center the arc at (400, 450)
+            const x = (width / 2) + r * Math.cos(angle);
+            const y = (height - 50) + r * Math.sin(angle);
 
-    // DIAGNOSTIC: Open your browser console to see these numbers
-    if (i < 5) console.log(`MP ${i}: x=${x.toFixed(2)}, y=${y.toFixed(2)}, angle=${angle.toFixed(2)}`);
+            svg.append("circle")
+                .attr("cx", x)
+                .attr("cy", y)
+                .attr("r", 5)
+                .attr("fill", colorMap[mp.party] || (mp.party_color ? `#${mp.party_color}` : "#808080"))
+                .attr("class", "mp-dot")
+                .on("mouseover", (event) => {
+                    tooltip.transition().duration(200).style("opacity", .9);
+                    tooltip.html(`<strong>${mp.name}</strong><br/>${mp.party}`)
+                        .style("left", (event.pageX + 10) + "px")
+                        .style("top", (event.pageY - 28) + "px");
+                })
+                .on("mouseout", () => tooltip.style("opacity", 0));
+        });
+    });    
 
-    svg.append("circle")
-        .attr("cx", x)
-        .attr("cy", y)
-        .attr("r", 5)
-        .attr("fill", colorMap[mp.party] || (mp.party_color ? `#${mp.party_color}` : "#808080"))
-        .attr("class", "mp-dot")
-        .on("mouseover", (event) => {
-            tooltip.transition().duration(200).style("opacity", .9);
-            tooltip.html(`<strong>${mp.name}</strong><br/>${mp.party}`)
-                .style("left", (event.pageX + 10) + "px")
-                .style("top", (event.pageY - 28) + "px");
-        })
-        .on("mouseout", () => tooltip.style("opacity", 0));
-});      
-    }).catch(err => console.error("Error loading JSON:", err));
+
 </script>    
 
     

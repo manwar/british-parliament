@@ -24,15 +24,18 @@ if ($response->is_success) {
     # 3. Simplify the data (ETL)
     # We only want what's necessary for the chart to keep the file small
     foreach my $item (@{$raw_data->{items}}) {
-        my $value = $item->{value};
+        my $val = $item->{value};
+        my $party_info = $val->{latestParty} || {};
+        
         push @mps, {
-            id           => $value->{id},
-            name         => $value->{nameDisplayAs},
-            party        => $value->{latestParty}->{name},
-            party_color  => $value->{latestParty}->{colour},
-            constituency => $value->{latestHouseMembership}->{membershipFrom},
+            id           => $val->{id},
+            name         => $val->{nameDisplayAs},
+            party        => $party_info->{name} || 'Unknown',
+            # Grab the 'colour' field from the latestParty object
+            party_color  => $party_info->{colour} || '808080', # Default to grey
+            constituency => $val->{latestHouseMembership}->{membershipFrom}
         };
-    }
+    }    
 
     # 4. Save to a local JSON file for the website to use
     my $json_out = encode_json(\@mps);

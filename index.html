@@ -44,28 +44,31 @@ const width = 800;
         const rows = 12; 
         const seatsPerRow = Math.ceil(totalSeats / rows);
 
+// Use a hardcoded number for the spread to force the curve
+        const dotsInRow = 55; 
+
         data.forEach((mp, i) => {
-            const rowNumber = Math.floor(i / seatsPerRow);
-            const posInRow = i % seatsPerRow;
+            const rowNumber = Math.floor(i / dotsInRow);
+            const posInRow = i % dotsInRow;
 
-            // 1. Increase the radius so the arc is bigger and more visible
-            const r = 140 + (rowNumber * 22); 
+            // Radius: Distance from the bottom center
+            const r = 150 + (rowNumber * 22); 
             
-            // 2. The Arc: Use -Math.PI to 0. 
-            // This forces the Sine wave to go UP into the SVG's negative coordinate space.
-            const angle = -Math.PI + (posInRow / (seatsPerRow - 1)) * Math.PI;
+            // Angle: Force a calculation that MUST change per dot
+            // Math.PI is ~3.14. We want to go from 3.14 to 6.28
+            const angle = Math.PI + (posInRow / (dotsInRow - 1)) * Math.PI;
 
-            // 3. Positioning: 
-            // Center X at 400. 
-            // Set the Y "Base" at 450 (near the bottom) so the arc swings UP to y=200.
-            const x = (width / 2) + r * Math.cos(angle);
-            const y = (height - 50) + r * Math.sin(angle);
+            // Coordinates:
+            // x = center (400) + horizontal offset
+            // y = bottom (450) + vertical offset (which will be NEGATIVE, moving it UP)
+            const x = 400 + r * Math.cos(angle);
+            const y = 450 + r * Math.sin(angle);
 
             svg.append("circle")
                 .attr("cx", x)
                 .attr("cy", y)
                 .attr("r", 5)
-                .attr("fill", colorMap[mp.party] || (mp.party_color ? `#${mp.party_color}` : "#808080"))
+                .attr("fill", colorMap[mp.party] || "#808080")
                 .attr("class", "mp-dot")
                 .on("mouseover", (event) => {
                     tooltip.transition().duration(200).style("opacity", .9);

@@ -1,0 +1,25 @@
+name: Hourly MP Sync
+on:
+  schedule:
+    - cron: '0 * * * *' # Every hour
+  workflow_dispatch:      # Manual trigger
+
+jobs:
+  fetch_and_commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Perl modules
+        run: sudo apt-get install -i libjson-perl libwww-perl
+
+      - name: Run Perl Fetcher
+        run: perl fetch_mps.pl
+
+      - name: Commit changes
+        run: |
+          git config user.name "ParliamentBot"
+          git config user.email "bot@github.com"
+          git add public/members.json
+          git commit -m "Update MP seating data [skip ci]" || echo "No changes to commit"
+          git push

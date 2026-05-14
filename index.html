@@ -19,6 +19,19 @@
         const height = 500;
         const margin = 50;
 
+        const colorMap = {
+            "Labour": "#E4003B",
+            "Labour (Co-op)": "#E4003B",
+            "Conservative": "#0087DC",
+            "Liberal Democrat": "#FAA61A",
+            "Reform UK": "#12B6CF",
+            "Green Party": "#6AB023",
+            "Scottish National Party": "#FDF38E",
+            "Plaid Cymru": "#005B54",
+            "Independent": "#DCDCDC",
+            "Speaker": "#37312D"
+        };
+        
         // 1. Create the SVG canvas
         const svg = d3.select("#chart")
             .append("svg")
@@ -51,12 +64,13 @@
                 // Math for positioning (Standard Polar to Cartesian conversion)
                 const x = (width / 2) + r * Math.cos(angle);
                 const y = (height - 50) + r * Math.sin(angle);
-            
+
                 svg.append("circle")
                     .attr("cx", x)
                     .attr("cy", y)
-                    .attr("r", 6) // Slightly smaller dots look cleaner
-                    .attr("fill", mp.party_color ? `#${mp.party_color}` : "#ccc")
+                    .attr("r", 6)
+                    // Use the map first, then the API color, then a default grey
+                    .attr("fill", d => colorMap[d.party] || (d.party_color ? `#${d.party_color}` : "#808080"))
                     .attr("class", "mp-dot");
             });        
         });

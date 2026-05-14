@@ -32,41 +32,33 @@
             
             // Sort by party to group colors together
             data.sort((a, b) => a.party.localeCompare(b.party));
-
             const totalSeats = data.length;
-            const rows = 10; // Number of concentric rows
+            const rows = 12; // A few more rows makes it look "fuller"
             const seatsPerRow = Math.ceil(totalSeats / rows);
-
-            // 3. Drawing Logic
+            
             data.forEach((mp, i) => {
-                const row = Math.floor(i / seatsPerRow);
-                const col = i % seatsPerRow;
+                // Determine which row and position in that row the MP belongs to
+                const rowNumber = Math.floor(i / seatsPerRow);
+                const posInRow = i % seatsPerRow;
+            
+                // Radius: inner circle starts at 150, each row adds 25px
+                const r = 160 + (rowNumber * 22); 
                 
-                // Radius increases for each row
-                const r = 150 + (row * 25); 
-                // Angle spreads MPs in a semi-circle (180 degrees)
-                const angle = Math.PI + (col / seatsPerRow) * Math.PI;
-
+                // Angle: We want to go from 180° (Left) to 360° (Right)
+                // We add a tiny offset to prevent dots from sitting exactly on the edge
+                const angle = Math.PI + (posInRow / (seatsPerRow - 1)) * Math.PI;
+            
+                // Math for positioning (Standard Polar to Cartesian conversion)
                 const x = (width / 2) + r * Math.cos(angle);
-                const y = (height - margin) + r * Math.sin(angle);
-
-                // 4. Append the MP "seat"
+                const y = (height - 50) + r * Math.sin(angle);
+            
                 svg.append("circle")
                     .attr("cx", x)
                     .attr("cy", y)
-                    .attr("r", 8)
-                    .attr("fill", `#${mp.party_color || 'ccc'}`)
-                    .attr("class", "mp-dot")
-                    .on("mouseover", (event) => {
-                        tooltip.transition().duration(200).style("opacity", .9);
-                        tooltip.html(`<strong>${mp.name}</strong><br/>${mp.party}<br/>${mp.constituency}`)
-                            .style("left", (event.pageX + 10) + "px")
-                            .style("top", (event.pageY - 28) + "px");
-                    })
-                    .on("mouseout", () => {
-                        tooltip.transition().duration(500).style("opacity", 0);
-                    });
-            });
+                    .attr("r", 6) // Slightly smaller dots look cleaner
+                    .attr("fill", mp.party_color ? `#${mp.party_color}` : "#ccc")
+                    .attr("class", "mp-dot");
+            });        
         });
     </script>
 </body>
